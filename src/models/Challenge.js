@@ -1,31 +1,22 @@
-// src/models/Challenge.js
-
-export const criarDesafio = (titulo, tipo, criadoPor) => {
-  const agora = new Date();
-  const expiraEm = new Date();
-
-  if (tipo === 'diario') {
-    expiraEm.setDate(agora.getDate() + 1);
-  } else if (tipo === 'semanal') {
-    expiraEm.setDate(agora.getDate() + 7);
-  } else if (tipo === 'mensal') {
-    expiraEm.setDate(agora.getDate() + 31);
+export class Challenge {
+  constructor(id, titulo, descricao, tipo, criadoPor) {
+    this.id = id || crypto.randomUUID();
+    this.titulo = titulo;
+    this.descricao = descricao || "";
+    this.tipo = tipo; // 'diario', 'semanal', 'mensal'
+    this.criadoPor = criadoPor;
+    this.historicoPontos = []; // Armazena objetos { data: "02/03/2026", usuario: "Kawa" }
+    this.criadoEm = new Date().toISOString();
   }
 
-  return {
-    id: crypto.randomUUID(),
-    titulo,
-    tipo,
-    criadoPor, // 'Kawa' ou 'Parceira'
-    concluido: false,
-    criadoEm: agora.toISOString(),
-    expiraEm: expiraEm.toISOString(),
-  };
-};
+  // Método para verificar se alguém já pontuou hoje
+  static jaPontuouHoje(challenge, usuario) {
+    const hoje = new Date().toLocaleDateString();
+    return challenge.historicoPontos.some(p => p.data === hoje && p.usuario === usuario);
+  }
 
-export const obterStatusDesafio = (desafio) => {
-  if (desafio.concluido) return 'completed';
-  const agora = new Date();
-  const expiracao = new Date(desafio.expiraEm);
-  return agora > expiracao ? 'expired' : 'active';
-};
+  // Método para contar pontos totais de um usuário neste desafio
+  static contarPontos(challenge, usuario) {
+    return challenge.historicoPontos.filter(p => p.usuario === usuario).length;
+  }
+}
